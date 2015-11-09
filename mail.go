@@ -7,7 +7,7 @@ import (
 	"github.com/zachlatta/postman/mail"
 )
 
-func sendMail(recipient Recipient, emailField string, mailer *mail.Mailer,
+func sendMail(recipient string, mailer *mail.Mailer,
 	debug bool, success chan *email.Email, fail chan error) {
 
 	parsedSender, err := stdMail.ParseAddress(sender)
@@ -16,7 +16,7 @@ func sendMail(recipient Recipient, emailField string, mailer *mail.Mailer,
 		return
 	}
 
-	parsedTo, err := stdMail.ParseAddress(recipient[emailField])
+	parsedTo, err := stdMail.ParseAddress(recipient)
 	if err != nil {
 		fail <- err
 		return
