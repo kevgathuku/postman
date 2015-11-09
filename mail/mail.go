@@ -2,12 +2,9 @@
 package mail
 
 import (
-	"bytes"
 	"errors"
-	"io/ioutil"
 	"net/mail"
 	"net/smtp"
-	"text/template"
 
 	"gopkg.in/jordan-wright/email.v1"
 )
@@ -31,58 +28,22 @@ func NewMailer(username, password, host, port string) Mailer {
 	}
 }
 
-func NewMessage(from, to *mail.Address, subject string, files []string, templatePath,
-	htmlTemplatePath string, context interface{}) (*email.Email, error) {
+// NewMessage builds a new message instance
+func NewMessage(from, to *mail.Address, subject string,
+	htmlContent string) (*email.Email, error) {
 	msg := &email.Email{
 		From:    from.String(),
 		To:      []string{to.String()},
 		Subject: subject,
 	}
 
-	for _, file := range files {
-		_, err := msg.AttachFile(file)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if templatePath != "" {
-		parsed, err := parseTemplate(templatePath, context)
-		if err != nil {
-			return nil, err
-		}
-
-		msg.Text = parsed
-	}
-
-	if htmlTemplatePath != "" {
-		parsed, err := parseTemplate(htmlTemplatePath, context)
-		if err != nil {
-			return nil, err
-		}
-
-		msg.HTML = parsed
+	if htmlContent != "" {
+		msg.HTML = []byte(htmlContent)
 	}
 
 	return msg, nil
 }
 
-func parseTemplate(templatePath string, context interface{}) ([]byte, error) {
-	tmplBytes, err := ioutil.ReadFile(templatePath)
-	if err != nil {
-		return nil, err
-	}
-
-	t := template.Must(template.New("emailBody").Parse(string(tmplBytes)))
-
-	var doc bytes.Buffer
-	err = t.Execute(&doc, context)
-	if err != nil {
-		return nil, err
-	}
-
-	return doc.Bytes(), nil
-}
 
 // Send sends an email Message.
 func (m *Mailer) Send(msg *email.Email) error {
