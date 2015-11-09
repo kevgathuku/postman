@@ -35,15 +35,11 @@ func NewMessage(from, to *mail.Address, subject string,
 		From:    from.String(),
 		To:      []string{to.String()},
 		Subject: subject,
-	}
-
-	if htmlContent != "" {
-		msg.HTML = []byte(htmlContent)
+		HTML:    []byte(htmlContent),
 	}
 
 	return msg, nil
 }
-
 
 // Send sends an email Message.
 func (m *Mailer) Send(msg *email.Email) error {
